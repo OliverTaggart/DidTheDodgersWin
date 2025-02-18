@@ -1,3 +1,4 @@
+import { teamStringTodataMap } from "./TeamData.ts";
 
 // const kv = await Deno.openKv();
 const dodgersTeamString = "LAD";
@@ -45,7 +46,7 @@ async function fetchLatestGameData() {
     throw new Error("No API key found");
   }
   // const dateString = new Date().toISOString().split('T')[0];
-  const testDatestring = '2024-03-13'
+  const testDatestring = '2024-10-30'
 
   const url = `https://api.sportsdata.io/v3/mlb/scores/json/ScoresBasicFinal/${testDatestring}?key=${key}`
 
@@ -70,14 +71,21 @@ function didTheDodgersWin(game: Game) {
   }
 }
 
+function getOponentTeamString(game: Game) {
+  const oponentTeamKey = game.homeTeam == dodgersTeamString ? game.awayTeam : game.homeTeam;
+  const oponentTeam = teamStringTodataMap[oponentTeamKey];
+
+  return `${oponentTeam.city} ${oponentTeam.name}`;
+}
+
 if (import.meta.main) {
   const latestDodgersGame = await fetchLatestGameData();
   if(latestDodgersGame) {
     const wonOrLostString = didTheDodgersWin(latestDodgersGame) ? "won" : "lost";
-    const otherTeamString = latestDodgersGame.homeTeam == dodgersTeamString ? latestDodgersGame.awayTeam : latestDodgersGame.homeTeam;
     const dateFormatting = { year: 'numeric', month: 'long', day: 'numeric' } as const;
     const formattedEndDate = latestDodgersGame.gameEndDateTime.toLocaleDateString('en-US', dateFormatting);
-    const responseString = `The Dodgers ${wonOrLostString} their latest game.\nIt was played on ${formattedEndDate} vs ${otherTeamString}\nThe score was was ${latestDodgersGame.awayTeamRuns} - ${latestDodgersGame.homeTeamRuns}`;
+    const oponentString = getOponentTeamString(latestDodgersGame);
+    const responseString = `The Dodgers ${wonOrLostString} their latest game.\nIt was played on ${formattedEndDate} vs the ${oponentString}\nThe score was was ${latestDodgersGame.awayTeamRuns} - ${latestDodgersGame.homeTeamRuns}`;
     console.log(responseString);
   }
 }
