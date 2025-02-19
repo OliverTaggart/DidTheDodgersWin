@@ -78,7 +78,7 @@ function getOponentTeamString(game: Game) {
   return `${oponentTeam.city} ${oponentTeam.name}`;
 }
 
-if (import.meta.main) {
+async function getDidDodgersWinString(_req: Request): Response {
   const latestDodgersGame = await fetchLatestGameData();
   if(latestDodgersGame) {
     const wonOrLostString = didTheDodgersWin(latestDodgersGame) ? "won" : "lost";
@@ -86,6 +86,9 @@ if (import.meta.main) {
     const formattedEndDate = latestDodgersGame.gameEndDateTime.toLocaleDateString('en-US', dateFormatting);
     const oponentString = getOponentTeamString(latestDodgersGame);
     const responseString = `The Dodgers ${wonOrLostString} their latest game.\nIt was played on ${formattedEndDate} vs the ${oponentString}\nThe score was was ${latestDodgersGame.awayTeamRuns} - ${latestDodgersGame.homeTeamRuns}`;
-    console.log(responseString);
+    return new Response(responseString);
   }
+  return new Response('No game found');
 }
+
+Deno.serve(getDidDodgersWinString)
