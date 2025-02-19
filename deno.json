@@ -6,4 +6,12 @@
     "@std/assert": "jsr:@std/assert@1"
   },
   "nodeModulesDir": true,
+  "deploy": {
+    "project": "74d35c28-7f5f-4fbb-bdce-23ca84533393",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "main.ts"
+  }
 }

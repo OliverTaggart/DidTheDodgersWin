@@ -1,24 +1,8 @@
 import { teamStringTodataMap } from "./TeamData.ts";
 
-// const kv = await Deno.openKv();
+const kv = await Deno.openKv();
 const dodgersTeamString = "LAD";
-// const dbKey = "latest_dodgers_game";
-
-// Deno.cron("Increment a counter", { hour: { every: 1 } }, async () => {
-//   const latestDodgersGame: Game | undefined = await fetchLatestGameData();
-//   if(latestDodgersGame) {
-//     await kv.atomic().set([dbKey], JSON.stringify(latestDodgersGame)).commit();
-//   }
-// });
-
-// Deno.serve(async () => {
-//   // Get the latest count
-//   const latestDodgersGame = await kv.get<Game>([dbKey]);
-//   const wonOrLostString = didTheDodgersWin(latestDodgersGame.value!) ? "won" : "lost";
-//   const otherTeamString = latestDodgersGame.value?.HomeTeam == dodgersTeamString ? latestDodgersGame.value?.AwayTeam : latestDodgersGame.value?.HomeTeam;
-//   const responseString = `The Dodgers ${wonOrLostString} their latest game.\nIt was played on date vs ${otherTeamString}\nThe score was was ${latestDodgersGame.value?.AwayTeamRuns} - ${latestDodgersGame.value?.HomeTeamRuns}`;
-//   return new Response(responseString);
-// });
+const dbKey = "latest_dodgers_game";
 
 export class Game {
   constructor(
@@ -40,15 +24,15 @@ export class Game {
   }
 }
 
-async function fetchLatestGameData() {
+async function fetchLatestGameData(daysAgo: number = 0): Promise<Game | undefined> {
   const key = Deno.env.get("SPORTS_API_KEY")
   if (!key) {
     throw new Error("No API key found");
   }
-  // const dateString = new Date().toISOString().split('T')[0];
-  const testDatestring = '2024-10-30'
+  
+  const dateString = new Date(new Date().setDate(new Date().getDate() - daysAgo)).toISOString().split('T')[0];
 
-  const url = `https://api.sportsdata.io/v3/mlb/scores/json/ScoresBasicFinal/${testDatestring}?key=${key}`
+  const url = `https://api.sportsdata.io/v3/mlb/scores/json/ScoresBasicFinal/${dateString}?key=${key}`
 
   const resp = await fetch(url, {
     method: "GET",
@@ -78,17 +62,46 @@ function getOponentTeamString(game: Game) {
   return `${oponentTeam.city} ${oponentTeam.name}`;
 }
 
-async function getDidDodgersWinString(_req: Request): Response {
-  const latestDodgersGame = await fetchLatestGameData();
-  if(latestDodgersGame) {
-    const wonOrLostString = didTheDodgersWin(latestDodgersGame) ? "won" : "lost";
-    const dateFormatting = { year: 'numeric', month: 'long', day: 'numeric' } as const;
-    const formattedEndDate = latestDodgersGame.gameEndDateTime.toLocaleDateString('en-US', dateFormatting);
-    const oponentString = getOponentTeamString(latestDodgersGame);
-    const responseString = `The Dodgers ${wonOrLostString} their latest game.\nIt was played on ${formattedEndDate} vs the ${oponentString}\nThe score was was ${latestDodgersGame.awayTeamRuns} - ${latestDodgersGame.homeTeamRuns}`;
-    return new Response(responseString);
+function recursivelyAttemptToFetchGame(daysAgo: number) {
+  const maybeLatestGame = fetchLatestGameData(daysAgo);
+  if(maybeLatestGame) {
+    return maybeLatestGame;
+  } else {
+    return recursivelyAttemptToFetchGame(daysAgo + 1);
   }
-  return new Response('No game found');
 }
 
-Deno.serve(getDidDodgersWinString)
+function getDidDodgersWinString(latestDodgersGame: Game) {
+  const wonOrLostString = didTheDodgersWin(latestDodgersGame) ? "won" : "lost";
+  const dateFormatting = { year: 'numeric', month: 'long', day: 'numeric' } as const;
+  const formattedEndDate = latestDodgersGame.gameEndDateTime.toLocaleDateString('en-US', dateFormatting);
+  const oponentString = getOponentTeamString(latestDodgersGame);
+  const responseString = `The Dodgers ${wonOrLostString} their latest game.\nIt was played on ${formattedEndDate} vs the ${oponentString}\nThe score was was ${latestDodgersGame.awayTeamRuns} - ${latestDodgersGame.homeTeamRuns}`;
+  return responseString;
+}
+
+Deno.cron("Store latest game info", { hour: { every: 1 } }, async () => {
+  const maybeTodaysGame = await fetchLatestGameData();
+  if(maybeTodaysGame) {
+    await kv.atomic().set([dbKey], JSON.stringify(maybeTodaysGame)).commit();
+    return;
+  } else {
+    const maybeStoredGame = await kv.get<Game>([dbKey]);
+    if(maybeStoredGame.value) {
+      return;
+    } else {
+        const latestGame = recursivelyAttemptToFetchGame(1)
+        await kv.atomic().set([dbKey], JSON.stringify(latestGame)).commit();
+    }
+  } 
+});
+
+Deno.serve(async () => {
+  const maybeLatestStoredGame = await kv.get<Game>([dbKey]);
+  const maybeLatestDodgersGame = maybeLatestStoredGame.value
+  if(maybeLatestDodgersGame) {
+    return new Response(getDidDodgersWinString(maybeLatestDodgersGame));
+  } else return new Response("No game found");
+});
+
+// Deno.serve(getDidDodgersWinString)
