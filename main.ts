@@ -62,8 +62,8 @@ function getOponentTeamString(game: Game) {
   return `${oponentTeam.city} ${oponentTeam.name}`;
 }
 
-function recursivelyAttemptToFetchGame(daysAgo: number) {
-  const maybeLatestGame = fetchLatestGameData(daysAgo);
+async function recursivelyAttemptToFetchGame(daysAgo: number) {
+  const maybeLatestGame = await fetchLatestGameData(daysAgo);
   if(maybeLatestGame) {
     return maybeLatestGame;
   } else {
@@ -90,7 +90,7 @@ Deno.cron("Store latest game info", { hour: { every: 1 } }, async () => {
     if(maybeStoredGame.value) {
       return;
     } else {
-        const latestGame = recursivelyAttemptToFetchGame(1)
+        const latestGame = await recursivelyAttemptToFetchGame(1)
         await kv.atomic().set([dbKey], JSON.stringify(latestGame)).commit();
     }
   } 
