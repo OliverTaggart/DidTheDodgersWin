@@ -6,5 +6,4 @@
     "@std/assert": "jsr:@std/assert@1"
   },
   "nodeModulesDir": true,
-  "project":"did-the-dodgers-win"
 }
