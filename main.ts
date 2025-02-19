@@ -63,6 +63,7 @@ function getOponentTeamString(game: Game) {
 }
 
 async function recursivelyAttemptToFetchGame(daysAgo: number) {
+  console.log(`Looking for game ${daysAgo} days ago`);
   const maybeLatestGame = await fetchLatestGameData(daysAgo);
   if(maybeLatestGame) {
     return maybeLatestGame;
@@ -83,13 +84,16 @@ function getDidDodgersWinString(latestDodgersGame: Game) {
 Deno.cron("Store latest game info", { hour: { every: 1 } }, async () => {
   const maybeTodaysGame = await fetchLatestGameData();
   if(maybeTodaysGame) {
+    console.log("Storing today's game");
     await kv.atomic().set([dbKey], JSON.stringify(maybeTodaysGame)).commit();
     return;
   } else {
     const maybeStoredGame = await kv.get<Game>([dbKey]);
     if(maybeStoredGame.value) {
+      console.log("No game found today, defaulting to saved game");
       return;
     } else {
+        console.log("Recursively searching for game");
         const latestGame = await recursivelyAttemptToFetchGame(1)
         await kv.atomic().set([dbKey], JSON.stringify(latestGame)).commit();
     }
