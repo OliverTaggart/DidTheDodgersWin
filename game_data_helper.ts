@@ -29,6 +29,15 @@ export async function fetchLatestGameData(daysAgo: number = 0): Promise<Game | u
     method: "GET",
   });
   const data = await resp.json();
+
+  console.log(data);
+
+  // Ensure data is an array
+  if (!Array.isArray(data)) {
+    console.log("Data was not an array");
+    return undefined;
+  }
+
   const games: Game[] = data.map((gameData: {awayTeamRuns: number; homeTeamRuns: number; awayTeam: string; homeTeam: string; gameEndDateTime: Date}) => Game.fromJson(gameData));
   console.log(`Found ${games.length} games`);
   const maybeLastDodgersGame = games.find((game) => {
