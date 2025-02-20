@@ -9,7 +9,7 @@ export async function recursivelyAttemptToFetchGameData(daysAgo: number) {
     if(maybeLatestGame) {
       return maybeLatestGame;
     } else {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 5000));
       return recursivelyAttemptToFetchGameData(daysAgo + 1);
     }
   }
@@ -29,6 +29,12 @@ export async function fetchLatestGameData(daysAgo: number = 0): Promise<Game | u
   const resp = await fetch(url, {
     method: "GET",
   });
+
+  if(resp.status != 200) {
+    console.log(`Failed to fetch game data: ${resp.status} ${resp.statusText}`);
+    return undefined;
+  }
+
   const data = await resp.json();
 
   console.log(data);
@@ -47,7 +53,7 @@ export async function fetchLatestGameData(daysAgo: number = 0): Promise<Game | u
       return game;
     }
   });
-  
+
   return maybeLastDodgersGame;
 }
 
