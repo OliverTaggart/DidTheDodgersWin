@@ -21,6 +21,8 @@ export async function fetchLatestGameData(daysAgo: number = 0): Promise<Game | u
   
   const dateString = new Date(new Date().setDate(new Date().getDate() - daysAgo)).toISOString().split('T')[0];
 
+  console.log(`Fetching game data for ${dateString}`);
+
   const url = `https://api.sportsdata.io/v3/mlb/scores/json/ScoresBasicFinal/${dateString}?key=${key}`
 
   const resp = await fetch(url, {
@@ -28,6 +30,7 @@ export async function fetchLatestGameData(daysAgo: number = 0): Promise<Game | u
   });
   const data = await resp.json();
   const games: Game[] = data.map((gameData: {awayTeamRuns: number; homeTeamRuns: number; awayTeam: string; homeTeam: string; gameEndDateTime: Date}) => Game.fromJson(gameData));
+  console.log(`Found ${games.length} games`);
   const maybeLastDodgersGame = games.find((game) => {
     if (game.homeTeam == dodgersTeamString || game.awayTeam == dodgersTeamString) {
       return game;
