@@ -1,5 +1,5 @@
 import { Game } from "./game.ts";
-import { fetchLatestGameData, getDidDodgersWinDisplayString, recursivelyAttemptToFetchGameData } from "./game_data_helper.ts";
+import { fetchLatestGameData, gameValuesAreNotNull, getDidDodgersWinDisplayString, recursivelyAttemptToFetchGameData } from "./game_data_helper.ts";
 
 const kv = await Deno.openKv();
 const dbKey = "latest_dodgers_game";
@@ -12,7 +12,7 @@ Deno.cron("Store latest game info", { hour: { every: 1 } }, async () => {
     return;
   } else {
     const maybeStoredGame = await kv.get<Game>([dbKey]);
-    if(maybeStoredGame.value && maybeStoredGame.value.awayTeam !== null) {
+    if(maybeStoredGame.value && gameValuesAreNotNull(maybeStoredGame.value)) {
       console.log("No game found today, defaulting to saved game");
       return;
     } else {
@@ -26,7 +26,7 @@ Deno.cron("Store latest game info", { hour: { every: 1 } }, async () => {
 Deno.serve(async () => {
   const maybeLatestStoredGame = await kv.get<Game>([dbKey]);
   const maybeLatestDodgersGame = maybeLatestStoredGame.value
-  if(maybeLatestDodgersGame && maybeLatestDodgersGame.awayTeam !== null) {
+  if(maybeLatestDodgersGame && gameValuesAreNotNull(maybeLatestDodgersGame)) {
     return new Response(getDidDodgersWinDisplayString(maybeLatestDodgersGame));
   } else return new Response("No game found");
 });

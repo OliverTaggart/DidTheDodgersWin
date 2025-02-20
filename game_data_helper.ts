@@ -62,3 +62,7 @@ export function getDidDodgersWinDisplayString(latestDodgersGame: Game) {
   const responseString = `The Dodgers ${wonOrLostString} their latest game.\nIt was played on ${formattedEndDate} vs the ${oponentString}\nThe score was was ${latestDodgersGame.awayTeamRuns} - ${latestDodgersGame.homeTeamRuns}`;
   return responseString;
 }
+
+export function gameValuesAreNotNull(game: Game) {
+  return game.awayTeam != null && game.homeTeam != null && game.awayTeamRuns != null && game.homeTeamRuns != null && game.gameEndDateTime != null;
+}
