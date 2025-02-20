@@ -4,6 +4,10 @@ import { fetchLatestGameData, getDidDodgersWinDisplayString, recursivelyAttemptT
 const kv = await Deno.openKv();
 const dbKey = "latest_dodgers_game";
 
+Deno.cron("sample cron", "*/10 * * * *", () => {
+  console.log("cron job executed every 10 minutes");
+});
+
 Deno.cron("Store latest game info", { hour: { every: 1 } }, async () => {
   const maybeTodaysGame = await fetchLatestGameData();
   if(maybeTodaysGame) {
