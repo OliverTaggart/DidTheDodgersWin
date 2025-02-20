@@ -6,7 +6,7 @@ export class TeamData {
     ) {}
 }
 
-export const teamStringTodataMap: { [key: string]: TeamData } = {
+export const TeamStringToDataMap: { [key: string]: TeamData } = {
     "LAD": {
         city: "Los Angeles",
         name: "Dodgers",
