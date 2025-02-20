@@ -9,6 +9,7 @@ export async function recursivelyAttemptToFetchGameData(daysAgo: number) {
     if(maybeLatestGame) {
       return maybeLatestGame;
     } else {
+      await new Promise(resolve => setTimeout(resolve, 1000));
       return recursivelyAttemptToFetchGameData(daysAgo + 1);
     }
   }
@@ -40,11 +41,13 @@ export async function fetchLatestGameData(daysAgo: number = 0): Promise<Game | u
 
   const games: Game[] = data.map((gameData: {awayTeamRuns: number; homeTeamRuns: number; awayTeam: string; homeTeam: string; gameEndDateTime: Date}) => Game.fromJson(gameData));
   console.log(`Found ${games.length} games`);
+
   const maybeLastDodgersGame = games.find((game) => {
     if (game.homeTeam == dodgersTeamString || game.awayTeam == dodgersTeamString) {
       return game;
     }
   });
+  
   return maybeLastDodgersGame;
 }
 
