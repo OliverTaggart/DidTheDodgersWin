@@ -12,7 +12,7 @@ Deno.cron("Store latest game info", { hour: { every: 1 } }, async () => {
     return;
   } else {
     const maybeStoredGame = await kv.get<Game>([dbKey]);
-    if(maybeStoredGame.value) {
+    if(maybeStoredGame.value && maybeStoredGame.value.awayTeam !== null) {
       console.log("No game found today, defaulting to saved game");
       return;
     } else {
