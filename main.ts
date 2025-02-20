@@ -26,7 +26,7 @@ Deno.cron("Store latest game info", { hour: { every: 1 } }, async () => {
 Deno.serve(async () => {
   const maybeLatestStoredGame = await kv.get<Game>([dbKey]);
   const maybeLatestDodgersGame = maybeLatestStoredGame.value
-  if(maybeLatestDodgersGame) {
+  if(maybeLatestDodgersGame && maybeLatestDodgersGame.awayTeam !== null) {
     return new Response(getDidDodgersWinDisplayString(maybeLatestDodgersGame));
   } else return new Response("No game found");
 });
