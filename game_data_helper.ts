@@ -88,6 +88,13 @@ export function getDidDodgersWinDisplayString(latestDodgersGame: Game) {
 }
 
 export function gameValuesAreNotNull(game: Game) {
+    console.log(`Game during null checks ${game}`);
+    console.log(`awayTeam: ${game.awayTeam}`);
+    console.log(`homeTeam: ${game.homeTeam}`);
+    console.log(`awayTeamRuns: ${game.awayTeamRuns}`);
+    console.log(`homeTeamRuns: ${game.homeTeamRuns}`);
+    console.log(`gameEndDateTime: ${game.gameEndDateTime}`);
+
     const awayTeamNotNull = game.awayTeam != null;
     const homeTeamNotNull = game.homeTeam != null;
     const awayTeamRunsNotNull = game.awayTeamRuns != null;
