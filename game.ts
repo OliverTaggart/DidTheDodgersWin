@@ -7,13 +7,13 @@ export class Game {
       public gameEndDateTime: Date,
     ) {}
   
-    static fromJson(json: {awayTeamRuns: number; homeTeamRuns: number; awayTeam: string; homeTeam: string, gameEndDateTime: Date}): Game {
+    static fromJson(json: {AwayTeamRuns: number; HomeTeamRuns: number; AwayTeam: string; HomeTeam: string, GameEndDateTime: Date}): Game {
       return new Game(
-        json.awayTeamRuns,
-        json.homeTeamRuns,
-        json.awayTeam,
-        json.homeTeam,
-        new Date(json.gameEndDateTime),
+        json.AwayTeamRuns,
+        json.HomeTeamRuns,
+        json.AwayTeam,
+        json.HomeTeam,
+        new Date(json.GameEndDateTime),
       );
     }
   }
