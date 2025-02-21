@@ -28,10 +28,6 @@ Deno.serve(async () => {
   const maybeLatestDodgersGame = maybeLatestStoredGame.value
   console.log(`Displaying stored game:${typeof maybeLatestDodgersGame} ${maybeLatestDodgersGame}`);
   console.log(`hom team runs: ${maybeLatestDodgersGame?.homeTeamRuns}`);
-  const g = maybeLatestDodgersGame ? true : false;
-  const h = gameValuesAreNotNull(maybeLatestDodgersGame!);
-  console.log(`Game exists: ${g}`);
-  console.log(`Game values are not null: ${h}`);
 
   if(maybeLatestDodgersGame && gameValuesAreNotNull(maybeLatestDodgersGame)) {
     return new Response(getDidDodgersWinDisplayString(maybeLatestDodgersGame));
