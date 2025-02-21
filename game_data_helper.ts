@@ -45,7 +45,7 @@ export async function fetchLatestGameData(daysAgo: number = 0): Promise<Game | u
     return undefined;
   }
 
-  const games: Game[] = data.map((gameData: {AwayTeamRuns: number; HomeTeamRuns: number; AwayTeam: string; HomeTeam: string; GameEndDateTime: Date}) => Game.fromJson(gameData));
+  const games: Game[] = data.map((gameData: {AwayTeamRuns: string; HomeTeamRuns: string; AwayTeam: string; HomeTeam: string; GameEndDateTime: string}) => Game.fromJson(gameData));
   console.log(`Found ${games.length} games`);
 
   const maybeLastDodgersGame = games.find((game) => {
