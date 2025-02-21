@@ -17,7 +17,7 @@ Deno.cron("Store latest game info", { hour: { every: 1 } }, async () => {
       return;
     } else {
         console.log("Recursively searching for game");
-        const latestGame = await recursivelyAttemptToFetchGameData(60)
+        const latestGame = await recursivelyAttemptToFetchGameData(1)
         await kv.atomic().set([dbKey], JSON.stringify(latestGame)).commit();
     }
   } 
