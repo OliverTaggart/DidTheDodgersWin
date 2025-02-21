@@ -27,6 +27,11 @@ Deno.serve(async () => {
   const maybeLatestStoredGame = await kv.get<Game>([dbKey]);
   const maybeLatestDodgersGame = maybeLatestStoredGame.value
   console.log(`Displaying stored game: ${maybeLatestDodgersGame}`);
+  const g = maybeLatestDodgersGame ? true : false;
+  const h = gameValuesAreNotNull(maybeLatestDodgersGame!);
+  console.log(`Game exists: ${g}`);
+  console.log(`Game values are not null: ${h}`);
+
   if(maybeLatestDodgersGame && gameValuesAreNotNull(maybeLatestDodgersGame)) {
     return new Response(getDidDodgersWinDisplayString(maybeLatestDodgersGame));
   } else return new Response("No game found");
