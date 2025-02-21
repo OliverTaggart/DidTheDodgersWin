@@ -45,8 +45,14 @@ export async function fetchLatestGameData(daysAgo: number = 0): Promise<Game | u
     return undefined;
   }
 
-  const games: Game[] = data.map((gameData: {AwayTeamRuns: string; HomeTeamRuns: string; AwayTeam: string; HomeTeam: string; GameEndDateTime: string}) => Game.fromJson(gameData));
-  console.log(`Found ${games.length} games`);
+  // Filter out games that are not completed
+  const games: Game[] = data
+    .filter((gameData: {AwayTeamRuns: string | null; HomeTeamRuns: string | null; AwayTeam: string; HomeTeam: string; GameEndDateTime: string | null}) => 
+      gameData.AwayTeamRuns != null && gameData.HomeTeamRuns != null && gameData.GameEndDateTime != null)
+    .map((gameData: {AwayTeamRuns: string; HomeTeamRuns: string; AwayTeam: string; HomeTeam: string; GameEndDateTime: string}) => 
+      Game.fromJson(gameData));
+
+  console.log(`Found ${games.length} completed games`);
 
   const maybeLastDodgersGame = games.find((game) => {
     if (game.homeTeam == dodgersTeamString || game.awayTeam == dodgersTeamString) {
@@ -83,4 +89,8 @@ export function getDidDodgersWinDisplayString(latestDodgersGame: Game) {
 
 export function gameValuesAreNotNull(game: Game) {
   return game.awayTeam != null && game.homeTeam != null && game.awayTeamRuns != null && game.homeTeamRuns != null && game.gameEndDateTime != null;
+}
+
+export function gameIsComplete(game: Game) {
+    return game.gameEndDateTime.getTime() !== new Date(0).getTime();
 }
